@@ -17,7 +17,7 @@
         }
     },
     "required": [
-        "book",
+        "bookName",
         "author",
         "description"
     ],

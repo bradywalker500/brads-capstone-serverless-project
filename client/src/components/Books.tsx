@@ -3,19 +3,20 @@ import update from 'immutability-helper'
 import * as React from 'react'
 import {
   Button,
-  Checkbox,
-  Divider,
   Grid,
   Header,
   Icon,
-  Input,
   Image,
-  Loader
+  Loader,
+  Card,
+  Checkbox
 } from 'semantic-ui-react'
 
 import { createBook, deleteBook, getBooks, patchBook } from '../api/books-api'
 import Auth from '../auth/Auth'
 import { Book } from '../types/Book'
+import ModalExampleModal from '../components/utils/Modal'
+import dateFormat from 'dateformat'
 
 interface BooksProps {
   auth: Auth
@@ -25,18 +26,41 @@ interface BooksProps {
 interface BooksState {
   books: Book[]
   newBookName: string
+  newAuthor: string
+  newDescription: string
   loadingBooks: boolean
+  isSaving: boolean
 }
 
 export class Books extends React.PureComponent<BooksProps, BooksState> {
   state: BooksState = {
     books: [],
     newBookName: '',
-    loadingBooks: true
+    newAuthor: '',
+    newDescription: '',
+    loadingBooks: true,
+    isSaving: false
   }
 
-  handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  handleAddButtonClick = () => {
+    this.setState({
+      ...this.state,
+      newBookName: '',
+      newAuthor: '',
+      newDescription: ''
+    })
+  }
+
+  handleBookNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ newBookName: event.target.value })
+  }
+
+  handleAuthorChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ newAuthor: event.target.value })
+  }
+
+  handleDescriptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ newDescription: event.target.value })
   }
 
   onEditButtonClick = (bookId: string) => {
@@ -44,20 +68,24 @@ export class Books extends React.PureComponent<BooksProps, BooksState> {
   }
 
   onBookCreate = async (event: React.ChangeEvent<HTMLButtonElement>) => {
+    this.setState({ isSaving: true })
     try {
-      const author = "Author"
-      const description = "Description"
       const newBook = await createBook(this.props.auth.getIdToken(), {
         bookName: this.state.newBookName,
-        author,
-        description
+        author: this.state.newAuthor,
+        description: this.state.newDescription
       })
       this.setState({
         books: [...this.state.books, newBook],
-        newBookName: ''
+        newBookName: '',
+        newAuthor: '',
+        newDescription: '',
+        isSaving: false
       })
-    } catch(e) {
-      let errorMessage = "Book creation failed"
+      alert('Book Created Successfully')
+    } catch (e) {
+      this.setState({ isSaving: false })
+      let errorMessage = 'Book creation failed'
       if (e instanceof Error) {
         errorMessage = `Book creation failed: ${e.message}`
       }
@@ -69,11 +97,12 @@ export class Books extends React.PureComponent<BooksProps, BooksState> {
     try {
       await deleteBook(this.props.auth.getIdToken(), bookId)
       this.setState({
-        books: this.state.books.filter(book => book.bookId !== bookId)
+        books: this.state.books.filter((book) => book.bookId !== bookId)
       })
-    } catch(e) {
+      alert('Book Deleted Successfully')
+    } catch (e) {
       let errorMessage = 'Book deletion failed'
-      if (e instanceof Error){
+      if (e instanceof Error) {
         errorMessage = `Book deletion failed: ${e.message}`
       }
       alert(errorMessage)
@@ -94,9 +123,9 @@ export class Books extends React.PureComponent<BooksProps, BooksState> {
           [pos]: { read: { $set: !book.read } }
         })
       })
-    } catch(e) {
+    } catch (e) {
       let errorMessage = 'Book deletion failed'
-      if (e instanceof Error){
+      if (e instanceof Error) {
         errorMessage = 'Book deletion failed' + e.message
       }
       alert(errorMessage)
@@ -111,8 +140,8 @@ export class Books extends React.PureComponent<BooksProps, BooksState> {
         loadingBooks: false
       })
     } catch (e) {
-      let errorMessage = "Failed to fetch books"
-      if (e instanceof Error){
+      let errorMessage = 'Failed to fetch books'
+      if (e instanceof Error) {
         errorMessage = `Failed to fetch books: ${e.message}`
       }
       alert(errorMessage)
@@ -124,35 +153,23 @@ export class Books extends React.PureComponent<BooksProps, BooksState> {
       <div>
         <Header as="h1">My Books Collection</Header>
 
-        {this.renderCreateBookInput()}
+        <ModalExampleModal
+          buttonMessage={'Add Book'}
+          handleBookNameChange={this.handleBookNameChange}
+          handleAuthorChange={this.handleAuthorChange}
+          handleDescriptionChange={this.handleDescriptionChange}
+          onBookCreate={this.onBookCreate}
+          isSaving={this.state.isSaving}
+          newBookName={this.state.newBookName}
+          newAuthor={this.state.newAuthor}
+          newDescription={this.state.newDescription}
+          handleAddButtonClick={this.handleAddButtonClick}
+        />
+
+        <hr />
 
         {this.renderBooks()}
       </div>
-    )
-  }
-
-  renderCreateBookInput() {
-    return (
-      <Grid.Row>
-        <Grid.Column width={16}>
-          <Input
-            action={{
-              color: 'teal',
-              labelPosition: 'left',
-              icon: 'add',
-              content: 'New task',
-              onClick: this.onBookCreate
-            }}
-            fluid
-            actionPosition="left"
-            placeholder="To change the world..."
-            onChange={this.handleNameChange}
-          />
-        </Grid.Column>
-        <Grid.Column width={16}>
-          <Divider />
-        </Grid.Column>
-      </Grid.Row>
     )
   }
 
@@ -176,49 +193,57 @@ export class Books extends React.PureComponent<BooksProps, BooksState> {
 
   renderBooksList() {
     return (
-      <Grid padded>
-        {this.state.books.map((book, pos) => {
-          return (
-            <Grid.Row key={book.bookId}>
-              <Grid.Column width={1} verticalAlign="middle">
-                <Checkbox
-                  onChange={() => this.onBookCheck(pos)}
-                  checked={book.read}
-                />
-              </Grid.Column>
-              <Grid.Column width={10} verticalAlign="middle">
-                {book.bookName}
-              </Grid.Column>
-              <Grid.Column width={3} floated="right">
-                {book.author}
-              </Grid.Column>
-              <Grid.Column width={1} floated="right">
-                <Button
-                  icon
-                  color="blue"
-                  onClick={() => this.onEditButtonClick(book.bookId)}
-                >
-                  <Icon name="pencil" />
-                </Button>
-              </Grid.Column>
-              <Grid.Column width={1} floated="right">
-                <Button
-                  icon
-                  color="red"
-                  onClick={() => this.onBookDelete(book.bookId)}
-                >
-                  <Icon name="delete" />
-                </Button>
-              </Grid.Column>
+      <Grid columns={4}>
+        {this.state.books.map((book, pos) => (
+          <Grid.Column key={book.bookId} width={4}>
+            <Card>
               {book.attachmentUrl && (
-                <Image src={book.attachmentUrl} size="small" wrapped />
+                <Image src={book.attachmentUrl} wrapped ui={false} />
               )}
-              <Grid.Column width={16}>
-                <Divider />
-              </Grid.Column>
-            </Grid.Row>
-          )
-        })}
+              <Card.Content>
+                <Card.Header>
+                  {book.bookName}
+                  <div style={{ float: 'right' }}>
+                    <Checkbox
+                      floated="right"
+                      label={{ children: book.read ? 'Read' : 'To Read' }}
+                      onChange={() => this.onBookCheck(pos)}
+                      checked={book.read}
+                    />
+                  </div>
+                </Card.Header>
+                <Card.Meta>
+                  <span className="date">
+                    Added On {dateFormat(book.addedOn, 'dd-mm-yyyy')}
+                  </span>
+                </Card.Meta>
+                <Card.Description>{book.description}</Card.Description>
+              </Card.Content>
+              <Card.Content extra>
+                <div className="ui two buttons">
+                  <Button
+                    icon
+                    labelPosition="left"
+                    color="teal"
+                    onClick={() => this.onEditButtonClick(book.bookId)}
+                  >
+                    Edit
+                    <Icon name="pencil" />
+                  </Button>
+                  <Button
+                    labelPosition="right"
+                    icon
+                    color="red"
+                    onClick={() => this.onBookDelete(book.bookId)}
+                  >
+                    Delete
+                    <Icon name="trash" />
+                  </Button>
+                </div>
+              </Card.Content>
+            </Card>
+          </Grid.Column>
+        ))}
       </Grid>
     )
   }

@@ -3,7 +3,7 @@
     "title": "book",
     "type": "object",
     "properties": {
-        "name": {
+        "bookName": {
             "type": "string",
             "pattern": "^(?!\\s*$).+"
         },
@@ -20,7 +20,7 @@
         }
     },
     "required": [
-        "name",
+        "bookName",
         "author",
         "description",
         "read"

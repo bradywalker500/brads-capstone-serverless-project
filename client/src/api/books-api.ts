@@ -21,6 +21,7 @@ export async function createBook(
   idToken: string,
   newBook: CreateBookRequest
 ): Promise<Book> {
+  console.log(`newBook: ${JSON.stringify(newBook)}`)
   const response = await Axios.post(`${apiEndpoint}/books`,  JSON.stringify(newBook), {
     headers: {
       'Content-Type': 'application/json',
