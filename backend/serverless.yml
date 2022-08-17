@@ -1,6 +1,6 @@
 # BOOK: Change the name of the org 
-org: bradServerlessCapstone
-app: serverlessbrad-capstone-app
+org: bradserverlesscapstone
+app: capstone
 service: serverlessbrad-capstone-app
 
 plugins:

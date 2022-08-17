@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Form, Button } from 'semantic-ui-react'
 import Auth from '../auth/Auth'
-import { getUploadUrl, uploadFile } from '../api/todos-api'
+import { getUploadUrl, uploadFile } from '../api/books-api'
 
 enum UploadState {
   NoUpload,
@@ -9,25 +9,25 @@ enum UploadState {
   UploadingFile,
 }
 
-interface EditTodoProps {
+interface EditBookProps {
   match: {
     params: {
-      todoId: string
+      bookId: string
     }
   }
   auth: Auth
 }
 
-interface EditTodoState {
+interface EditBookState {
   file: any
   uploadState: UploadState
 }
 
-export class EditTodo extends React.PureComponent<
-  EditTodoProps,
-  EditTodoState
+export class EditBook extends React.PureComponent<
+  EditBookProps,
+  EditBookState
 > {
-  state: EditTodoState = {
+  state: EditBookState = {
     file: undefined,
     uploadState: UploadState.NoUpload
   }
@@ -51,7 +51,7 @@ export class EditTodo extends React.PureComponent<
       }
 
       this.setUploadState(UploadState.FetchingPresignedUrl)
-      const uploadUrl = await getUploadUrl(this.props.auth.getIdToken(), this.props.match.params.todoId)
+      const uploadUrl = await getUploadUrl(this.props.auth.getIdToken(), this.props.match.params.bookId)
 
       this.setUploadState(UploadState.UploadingFile)
       await uploadFile(uploadUrl, this.state.file)
@@ -60,7 +60,7 @@ export class EditTodo extends React.PureComponent<
     } catch (e) {
       let errorMessage = "Could not upload a file"
       if (e instanceof Error){
-        errorMessage = 'Could not upload a file: ' + e.message
+        errorMessage = `Could not upload a file: ${e.message}`
       }
       alert(errorMessage)
     } finally {

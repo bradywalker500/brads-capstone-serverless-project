@@ -28,7 +28,7 @@ export async function createBook(
         author: createBookRequest.author,
         description: createBookRequest.description,
         read: false,
-        attachmentUrl: `https://${process.env.ATTACHMENT_S3_BUCKET}.s3.amazonaws.com/${bookId}`
+        attachmentUrl: `https://${process.env.BOOK_ATTACHMENT_S3_BUCKET}.s3.amazonaws.com/${bookId}`
     })
 }
 

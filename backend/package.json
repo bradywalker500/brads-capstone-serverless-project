@@ -1,7 +1,7 @@
 {
-    "name": "serverless-todo-app",
+    "name": "serverlessbrad-capstone-app",
     "version": "1.0.0",
-    "description": "Serverless TODO image app",
+    "description": "My Books Collection",
     "dependencies": {
         "@types/axios": "^0.14.0",
         "@types/http-errors": "^1.8.2",
