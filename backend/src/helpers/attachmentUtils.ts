@@ -3,7 +3,7 @@ import * as AWSXRay from 'aws-xray-sdk'
 
 const XAWS = AWSXRay.captureAWS(AWS)
 
-// TODO: Implement the fileStogare logic
+// BOOK: Implement the fileStogare logic
 
 // const docClient = new XAWS.DynamoDB.DocumentClient()
 const s3 = new XAWS.S3({
@@ -15,10 +15,10 @@ const urlExpiration = process.env.SIGNED_URL_EXPIRATION
 
 export class AttachmentUtils {
 
-    async getUploadUrl(todoId: string) {
+    async getUploadUrl(bookId: string) {
         return s3.getSignedUrl('putObject', {
           Bucket: bucketName,
-          Key: todoId,
+          Key: bookId,
           Expires: parseInt(urlExpiration)
         })
       }

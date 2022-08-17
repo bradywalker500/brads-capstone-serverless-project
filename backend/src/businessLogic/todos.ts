@@ -1,51 +1,52 @@
-import { TodosAccess } from '../dataLayer/todosAcess'
+import { BooksAccess } from '../dataLayer/booksAccess'
 import { AttachmentUtils } from '../helpers/attachmentUtils';
-import { TodoItem } from '../models/TodoItem'
-import { CreateTodoRequest } from '../requests/CreateTodoRequest'
-import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
+import { BookItem } from '../models/BookItem'
+import { CreateBookRequest } from '../requests/CreateBookRequest'
+import { UpdateBookRequest } from '../requests/UpdateBookRequest'
 import { createLogger } from '../utils/logger'
 import * as uuid from 'uuid'
 
-// TODO: Implement businessLogic
+// BOOK: Implement businessLogic
 
-const todosAccess = new TodosAccess()
+const booksAccess = new BooksAccess()
 const attachmentUtils = new AttachmentUtils()
-const logger = createLogger("todos")
+const logger = createLogger("books")
 
-export async function createTodo(
-    createTodoRequest: CreateTodoRequest,
+export async function createBook(
+    createBookRequest: CreateBookRequest,
     userId: string
-): Promise<TodoItem> {
+): Promise<BookItem> {
     
-    const todoId = uuid.v4()
-    logger.info("Creating Todo")
+    const bookId = uuid.v4()
+    logger.info("Creating Book")
 
-    return await todosAccess.createTodo({
-        todoId: todoId,
+    return await booksAccess.createBook({
+        bookId: bookId,
         userId: userId,
-        createdAt: new Date().toISOString(),
-        name: createTodoRequest.name,
-        dueDate: createTodoRequest.dueDate,
-        done: false,
-        attachmentUrl: `https://${process.env.ATTACHMENT_S3_BUCKET}.s3.amazonaws.com/${todoId}`
+        addedOn: new Date().toISOString(),
+        bookName: createBookRequest.bookName,
+        author: createBookRequest.author,
+        description: createBookRequest.description,
+        read: false,
+        attachmentUrl: `https://${process.env.ATTACHMENT_S3_BUCKET}.s3.amazonaws.com/${bookId}`
     })
 }
 
-export async function removeTodo(userId:string, todoId:string){
-    logger.info("Deleting Todo with ID " + todoId)
-    await todosAccess.removeTodo(userId, todoId)
+export async function removeBook(userId:string, bookId:string){
+    logger.info("Deleting Book with ID " + bookId)
+    await booksAccess.removeBook(userId, bookId)
 }
 
-export async function updateTodo(updateTodoRequest: UpdateTodoRequest, userId: string, todoId: string): Promise<UpdateTodoRequest>{
-    logger.info("Updating Todo with ID " + todoId)
-    return await todosAccess.updateTodo(updateTodoRequest, userId, todoId)
+export async function updateBook(updateBookRequest: UpdateBookRequest, userId: string, bookId: string): Promise<UpdateBookRequest>{
+    logger.info("Updating Book with ID " + bookId)
+    return await booksAccess.updateBook(updateBookRequest, userId, bookId)
 }
 
-export async function getTodosForUser(userId: string): Promise<TodoItem[]> {
-    logger.info("Retrieving Todos for userId " + userId)
-    return todosAccess.getTodosForUser(userId)
+export async function getBooksForUser(userId: string): Promise<BookItem[]> {
+    logger.info("Retrieving Books for userId " + userId)
+    return booksAccess.getBooksForUser(userId)
 }
 
-export async function createAttachmentPresignedUrl(todoId: string){
-    return await attachmentUtils.getUploadUrl(todoId);
+export async function createAttachmentPresignedUrl(bookId: string){
+    return await attachmentUtils.getUploadUrl(bookId);
 }

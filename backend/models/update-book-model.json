@@ -1,20 +1,29 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
-    "title": "todo",
+    "title": "book",
     "type": "object",
     "properties": {
         "name": {
             "type": "string",
             "pattern": "^(?!\\s*$).+"
         },
-        "dueDate": {
+        "author": {
             "type": "string",
             "pattern": "^(?!\\s*$).+"
+        },
+        "description": {
+            "type": "string",
+            "pattern": "^(?!\\s*$).+"
+        },
+        "read": {
+            "type": "boolean"
         }
     },
     "required": [
         "name",
-        "dueDate"
+        "author",
+        "description",
+        "read"
     ],
     "additionalProperties": false
 }
